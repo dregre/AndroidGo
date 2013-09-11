@@ -19,6 +19,8 @@ import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
 import com.actionbarsherlock.view.SubMenu;
 
+/* This is a new edit on the Undo branch. */
+
 public class MainActivity extends SherlockActivity {
 	//instance variables
 	private Game game;
