@@ -1,0 +1,139 @@
+package com.amgregori.androidgo;
+
+import com.google.common.collect.HashMultimap;
+
+//import com.google.common.collect.HashMultimap;
+
+public class Game {
+	// Point constants.  Must be char values of positive integers.
+	public static final char WHITE = '0';
+	public static final char BLACK = '1';
+	public static final char EMPTY = '2';
+	public static final char OUT_OF_BOUNDS = '3';
+
+	// Rules constants.  Must be positive integers.
+	public static final int POSITIONAL = 0;
+	public static final int SITUATIONAL = 1;
+	public static final int JAPANESE = 2;
+
+	int koRule;
+	boolean suicideRule;
+	Board board;
+	int passes;
+	char nextTurn;
+	HashMultimap<Integer, Situation> history;
+	boolean running;
+
+	public static char invertColor(char color){
+		return color == WHITE ? BLACK : color == BLACK ? WHITE : OUT_OF_BOUNDS;
+	}
+	
+	Game(int koRule, boolean suicideRule){
+		this.koRule = koRule;
+		this.suicideRule = suicideRule;
+		
+		this.board = new Board();
+		this.nextTurn = BLACK;
+		this.history = HashMultimap.create();
+		this.running = true;
+		
+		Situation s = new Situation(this.board.toString(), WHITE);
+		this.history.put(s.hashCode(), s);
+	}
+	
+	Game(){
+		this(POSITIONAL, false);
+	}
+
+	public void doCaptures(Board board, int x, int y) throws SuicideException{
+		Point stone = new Point(x, y, board.getStone(x, y)); 
+		for(Point p : board.getSurrounding(x, y)){
+			if(p.getColor() == invertColor(stone.getColor()) && board.isCaptured(p.getX(), p.getY())){
+				board.removeStones(board.getChain(p.getX(), p.getY()));
+			}
+		}
+		if(suicideRule && board.isCaptured(x, y)){
+			board.removeStones(board.getChain(x, y));
+		}else if(!suicideRule && board.isCaptured(x, y)){
+			throw new SuicideException();
+		}
+	}
+	
+	public void checkVacancy(int x, int y) throws PositionOccupiedException{
+		if(board.getStone(x, y) != EMPTY){
+			throw new PositionOccupiedException();
+		}
+	}
+	
+	public void setStone(int x, int y){
+		try{
+			checkRunning();
+			checkVacancy(x, y);
+			Board newBoard = board.clone();
+			newBoard.setStone(x, y, nextTurn);
+			doCaptures(newBoard, x, y);
+			checkKo(newBoard.toString());
+			Situation s = new Situation(newBoard.toString(), nextTurn);
+			history.put(s.hashCode(), s);
+			board = newBoard;
+			nextTurn = invertColor(nextTurn);
+		}catch(GameOverException ex) {
+			System.out.println("Game over.  No more moves allowed.");
+		}catch(KoException ex) {
+			System.out.println("Illegal move. Ko is violated.");
+		}catch(SuicideException ex){
+			System.out.println("Illegal move. Suicide is not allowed.");			
+		}catch(PositionOccupiedException ex){
+			System.out.println("Illegal move. Position is occupied.");			
+		}
+	}
+	
+	public void passTurn(){
+		if(passes < 1){
+			Situation s = new Situation(board.toString(), nextTurn);
+			history.put(s.hashCode(), s);
+			nextTurn = invertColor(nextTurn);
+			passes += 1;
+		}else{
+			running = false;
+		}
+	}
+	
+	public void checkRunning() throws GameOverException{
+		if(!running)
+			throw new GameOverException();
+	}
+	
+	public void checkKo(String position) throws KoException{
+		// Japapnese ko
+		/* insert here */
+		// Situational superko
+		Situation s = new Situation(position, nextTurn);
+		if(koRule == SITUATIONAL &&
+				history.containsEntry(s.hashCode(), s)){
+					throw new KoException();
+		}
+		// Positional superko
+		if(koRule == POSITIONAL){
+			Situation t = new Situation(position, invertColor(nextTurn));
+			if(history.containsEntry(s.hashCode(), s) ||
+					history.containsEntry(t.hashCode(), t)){
+				throw new KoException();
+			}
+		}
+	}
+
+}
+
+class KoException extends Exception{
+	KoException(){ super(); }
+}
+class SuicideException extends Exception{
+	SuicideException(){ super(); }	
+}
+class PositionOccupiedException extends Exception{
+	PositionOccupiedException(){ super(); }
+}
+class GameOverException extends Exception{
+	GameOverException(){ super(); }
+}

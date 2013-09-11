@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">AndroidGo</string>
+    <string name="action_settings">Settings</string>
+    <string name="pass_turn">Pass</string>
+    <string name="game_over">Game over</string>
+    <string name="new_game">New game</string>
+    <string name="about_this_app">AndroidGo was created by André Gregori as a test app.  Copyleft &#169; 2013 André Gregori.  No rights reserved.</string>
+    <string name="title_activity_about">About AndroidGo</string>
+    <string name="rules">Rules</string>
+    <string name="ko">Ko</string>
+    <string name="positional">Positional superko</string>
+    <string name="situational">Situational superko</string>
+    <string name="suicide">Suicide</string>
+    <string name="yes">Yes</string>
+    <string name="no">No</string>
+    <string name="board_size">Board size</string>
+    <string name="title_activity_settings">Settings</string>
+
+</resources>

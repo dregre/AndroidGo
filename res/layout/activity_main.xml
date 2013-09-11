@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout  xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/relativelayout"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    >
+<GridView
+	    android:id="@+id/gridview"
+	    android:layout_width="fill_parent" 
+	    android:layout_height="wrap_content"
+	    android:columnWidth="17dp"
+	    android:verticalSpacing="0dp"
+	    android:horizontalSpacing="0dp"
+	    android:stretchMode="columnWidth"
+	    android:gravity="center"
+	    android:layout_alignParentTop="true"
+	/>
+</RelativeLayout>
