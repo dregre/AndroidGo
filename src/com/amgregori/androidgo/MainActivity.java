@@ -5,12 +5,14 @@ import java.util.HashSet;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Typeface;
 import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
+import android.widget.Button;
 import android.widget.GridView;
 import android.widget.ImageView;
 
@@ -25,6 +27,7 @@ public class MainActivity extends SherlockActivity {
 	//instance variables
 	private Game game;
 	private int boardSize;
+	private Typeface fontAwesome;
 	
 	//constants
 	private static final String GAME_KEY = "game";
@@ -35,6 +38,21 @@ public class MainActivity extends SherlockActivity {
 	    PreferenceManager.setDefaultValues(this, R.xml.preferences, false);
 	    setContentView(R.layout.activity_main);
 	    
+		fontAwesome = Typefaces.get(this, "fonts/fontawesome-webfont.ttf");
+		
+		int[] controlButtonIds = {
+			R.id.controlButtonFirst,
+			R.id.controlButtonPrev,
+			R.id.controlButtonNext,
+			R.id.controlButtonLast
+		};
+		
+		Button button;
+		for(int controlButtonId : controlButtonIds) {
+			button = (Button) findViewById(controlButtonId);
+			button.setTypeface(fontAwesome);
+		}
+		
 	    if(savedInstanceState == null){
 	    	game = newGameFromSettings();
 	    }else{
