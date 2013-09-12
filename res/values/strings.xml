@@ -17,5 +17,7 @@
     <string name="no">No</string>
     <string name="board_size">Board size</string>
     <string name="title_activity_settings">Settings</string>
+    <string name="white_stones_taken">White stones taken</string>
+    <string name="black_stones_taken">Black stones taken</string>
 
 </resources>

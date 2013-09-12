@@ -1,6 +1,6 @@
 package com.amgregori.androidgo;
 
-import java.util.HashSet;
+import java.util.Collection;
 
 import android.content.Context;
 import android.content.Intent;
@@ -13,18 +13,20 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.GridView;
 import android.widget.ImageView;
+import android.widget.TextView;
 
 import com.actionbarsherlock.app.SherlockActivity;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
 import com.actionbarsherlock.view.SubMenu;
 
-/* This is a new edit on the Undo branch. */
-
 public class MainActivity extends SherlockActivity {
 	//instance variables
 	private Game game;
 	private int boardSize;
+	private GridView gridView;
+	private TextView whiteCount;
+	private TextView blackCount;
 	
 	//constants
 	private static final String GAME_KEY = "game";
@@ -34,6 +36,10 @@ public class MainActivity extends SherlockActivity {
 	    super.onCreate(savedInstanceState);
 	    PreferenceManager.setDefaultValues(this, R.xml.preferences, false);
 	    setContentView(R.layout.activity_main);
+	    gridView = (GridView) findViewById(R.id.gridview);
+	    whiteCount = (TextView) findViewById(R.id.white_taken);
+	    blackCount = (TextView) findViewById(R.id.black_taken);
+	    
 	    
 	    if(savedInstanceState == null){
 	    	game = newGameFromSettings();
@@ -41,12 +47,11 @@ public class MainActivity extends SherlockActivity {
 	    	game = savedInstanceState.getParcelable(GAME_KEY);
 			boardSize = savedInstanceState.getInt(BOARD_SIZE_KEY);
 	    }
-	    
+	    refreshCaptured();
 	    setupBoard();
 	}
 	
 	private ImageAdapter setupBoard(){
-		GridView gridView = (GridView) findViewById(R.id.gridview);
 		ImageAdapter adapter = new ImageAdapter(this);
 		gridView.setNumColumns(boardSize);
 		gridView.setAdapter(adapter);
@@ -76,6 +81,12 @@ public class MainActivity extends SherlockActivity {
 		return boardSize;
 	}
 	
+	// other methods
+	protected void refreshCaptured(){
+		whiteCount.setText(String.valueOf(game.capturedWhites));
+		blackCount.setText(String.valueOf(game.capturedBlacks));		
+	}
+	
 	private Game newGameFromSettings(){
 		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
 	    int koRule = prefs.getString("ko","0").equals("0") ? Game.SITUATIONAL : Game.POSITIONAL;
@@ -85,7 +96,6 @@ public class MainActivity extends SherlockActivity {
 	    return new Game(koRule, suicideRule, boardSize);
 	}
 	
-	// other methods	
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         
@@ -102,16 +112,15 @@ public class MainActivity extends SherlockActivity {
 					return true;
     			}
     	    });;
-        
-        
-        
+
         menu.add(R.string.new_game)
     		.setShowAsActionFlags(MenuItem.SHOW_AS_ACTION_ALWAYS | MenuItem.SHOW_AS_ACTION_WITH_TEXT)
     		.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
     			@Override
 				public boolean onMenuItemClick(MenuItem item) {
     				game = newGameFromSettings();
-    				setupBoard(); 
+    				refreshCaptured();
+    				setupBoard();
     				if(game.isRunning()){
     					passItem.setEnabled(true);
     					passItem.setTitle(R.string.pass_turn);
@@ -182,7 +191,8 @@ class ImageAdapter extends BaseAdapter {
     				// TODO Auto-generated method stub
     				Game game = mainActivity.getGame();
     				int index =  ((GridView) iV.getParent()).getPositionForView(iV);
-    				updateBoard(game.setStone(index));
+					updateBoard(game.setStone(index));
+					mainActivity.refreshCaptured();
     			}
     	    });
         } else {
@@ -242,7 +252,7 @@ class ImageAdapter extends BaseAdapter {
     	return mainActivity.getResources().getIdentifier(drawableName, "drawable", mainActivity.getPackageName());
 	}
 	
-	private void updateBoard(HashSet<Integer> indices){
+	private void updateBoard(Collection<Integer> indices){
 		char[] position = mainActivity.getGame().getPosition();
 		for(int index : indices){
 			setImageResource(index, position[index]);

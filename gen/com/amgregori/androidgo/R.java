@@ -923,31 +923,33 @@ containing a value of this type.
         public static final int go_black_bl=0x7f020072;
         public static final int go_black_br=0x7f020073;
         public static final int go_black_l=0x7f020074;
-        public static final int go_black_r=0x7f020075;
-        public static final int go_black_t=0x7f020076;
-        public static final int go_black_tl=0x7f020077;
-        public static final int go_black_tr=0x7f020078;
-        public static final int go_empty=0x7f020079;
-        public static final int go_empty_b=0x7f02007a;
-        public static final int go_empty_bl=0x7f02007b;
-        public static final int go_empty_br=0x7f02007c;
-        public static final int go_empty_l=0x7f02007d;
-        public static final int go_empty_r=0x7f02007e;
-        public static final int go_empty_t=0x7f02007f;
-        public static final int go_empty_tl=0x7f020080;
-        public static final int go_empty_tr=0x7f020081;
-        public static final int go_white=0x7f020082;
-        public static final int go_white_b=0x7f020083;
-        public static final int go_white_bl=0x7f020084;
-        public static final int go_white_br=0x7f020085;
-        public static final int go_white_l=0x7f020086;
-        public static final int go_white_r=0x7f020087;
-        public static final int go_white_t=0x7f020088;
-        public static final int go_white_tl=0x7f020089;
-        public static final int go_white_tr=0x7f02008a;
-        public static final int ic_action_overflow=0x7f02008b;
-        public static final int ic_action_settings=0x7f02008c;
-        public static final int ic_launcher=0x7f02008d;
+        public static final int go_black_no_bg=0x7f020075;
+        public static final int go_black_r=0x7f020076;
+        public static final int go_black_t=0x7f020077;
+        public static final int go_black_tl=0x7f020078;
+        public static final int go_black_tr=0x7f020079;
+        public static final int go_empty=0x7f02007a;
+        public static final int go_empty_b=0x7f02007b;
+        public static final int go_empty_bl=0x7f02007c;
+        public static final int go_empty_br=0x7f02007d;
+        public static final int go_empty_l=0x7f02007e;
+        public static final int go_empty_r=0x7f02007f;
+        public static final int go_empty_t=0x7f020080;
+        public static final int go_empty_tl=0x7f020081;
+        public static final int go_empty_tr=0x7f020082;
+        public static final int go_white=0x7f020083;
+        public static final int go_white_b=0x7f020084;
+        public static final int go_white_bl=0x7f020085;
+        public static final int go_white_br=0x7f020086;
+        public static final int go_white_l=0x7f020087;
+        public static final int go_white_no_bg=0x7f020088;
+        public static final int go_white_r=0x7f020089;
+        public static final int go_white_t=0x7f02008a;
+        public static final int go_white_tl=0x7f02008b;
+        public static final int go_white_tr=0x7f02008c;
+        public static final int ic_action_overflow=0x7f02008d;
+        public static final int ic_action_settings=0x7f02008e;
+        public static final int ic_launcher=0x7f02008f;
     }
     public static final class id {
         public static final int abs__action_bar=0x7f050020;
@@ -989,7 +991,9 @@ containing a value of this type.
         public static final int abs__textButton=0x7f050013;
         public static final int abs__title=0x7f05001b;
         public static final int abs__up=0x7f05000b;
-        public static final int action_settings=0x7f050034;
+        public static final int action_settings=0x7f050038;
+        public static final int black=0x7f050036;
+        public static final int black_taken=0x7f050037;
         public static final int disableHome=0x7f050009;
         public static final int edit_query=0x7f050026;
         public static final int gridview=0x7f050033;
@@ -1002,6 +1006,8 @@ containing a value of this type.
         public static final int showTitle=0x7f050007;
         public static final int tabMode=0x7f050003;
         public static final int useLogo=0x7f050004;
+        public static final int white=0x7f050034;
+        public static final int white_taken=0x7f050035;
         public static final int wrap_content=0x7f050000;
     }
     public static final class integer {
@@ -1082,6 +1088,7 @@ containing a value of this type.
         public static final int abs__shareactionprovider_share_with_application=0x7f0a0007;
         public static final int action_settings=0x7f0a000e;
         public static final int app_name=0x7f0a000d;
+        public static final int black_stones_taken=0x7f0a001e;
         public static final int board_size=0x7f0a001b;
         public static final int game_over=0x7f0a0010;
         public static final int ko=0x7f0a0015;
@@ -1094,6 +1101,7 @@ containing a value of this type.
         public static final int suicide=0x7f0a0018;
         public static final int title_activity_about=0x7f0a0013;
         public static final int title_activity_settings=0x7f0a001c;
+        public static final int white_stones_taken=0x7f0a001d;
         public static final int yes=0x7f0a0019;
     }
     public static final class style {

@@ -1,6 +1,10 @@
 package com.amgregori.androidgo;
 
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
+
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.Log;
@@ -33,15 +37,20 @@ public class Game implements Parcelable {
 	char nextTurn;
 	HashSet<Situation> history;
 	boolean running;
+	int capturedWhites;
+	int capturedBlacks;
 
 	public static char invertColor(char color){
 		return color == WHITE ? BLACK : color == BLACK ? WHITE : OUT_OF_BOUNDS;
 	}
 	
-	protected Game(String position, char nextTurn, boolean running, String[] historicalPositions, char[] historicalTurns, int koRule, boolean suicideRule){
+	protected Game(String position, char nextTurn, boolean running, String[] historicalPositions,
+			       char[] historicalTurns, int koRule, boolean suicideRule, int capturedWhites, int capturedBlacks){
 		this.board = new Board(position);
 		this.running = running;
 		this.nextTurn = nextTurn;
+		this.capturedWhites = capturedWhites;
+		this.capturedBlacks = capturedBlacks;
 		
 		this.history = new HashSet<Situation>();
 		for(int i = 0; i < historicalTurns.length; i++){
@@ -61,7 +70,7 @@ public class Game implements Parcelable {
 		this.history = new HashSet<Situation>();
 		this.running = true;
 		
-		Situation s = new Situation(this.board.toString(), WHITE);
+		Situation s = new Situation(this.board.toString(), invertColor(nextTurn));
 		this.history.add(s);
 	}
 	
@@ -93,7 +102,9 @@ public class Game implements Parcelable {
 		dest.writeStringArray(positions);
 		dest.writeIntArray(new int[]{
 				(int) nextTurn,
-				koRule
+				koRule,
+				capturedWhites,
+				capturedBlacks
 				});
 		dest.writeBooleanArray(new boolean[]{
 				suicideRule,
@@ -111,12 +122,15 @@ public class Game implements Parcelable {
 			int[] intArray = parcel.createIntArray();
 			char nextTurn = (char) intArray[0];
 			int koRule = intArray[1];
+			int capturedWhites = intArray[2];
+			int capturedBlacks = intArray[3];
 			
 			boolean[] booleanArray = parcel.createBooleanArray();
 			boolean suicideRule = booleanArray[0];
 			boolean running = booleanArray[1];
 			
-			return new Game(position, nextTurn, running, historicalPositions, historicalTurns, koRule, suicideRule);
+			return new Game(position, nextTurn, running, historicalPositions, historicalTurns,
+					        koRule, suicideRule, capturedWhites, capturedBlacks);
 		}
 
 		@Override
@@ -125,39 +139,66 @@ public class Game implements Parcelable {
 		}
 	};
 	
-	public void doCaptures(Board board, int x, int y) throws SuicideException{
-		Point stone = new Point(x, y, board.getStone(x, y)); 
+	public Map<Character, Integer> doCaptures(Board board, int x, int y) throws SuicideException{
+		Point stone = new Point(x, y, board.getColor(x, y));
+		HashSet<Point> removenda = null;
+		int value;
+		HashMap<Character, Integer> capturedCount = new HashMap<Character, Integer>();
 		for(Point p : board.getSurrounding(x, y)){
 			if(p.getColor() == invertColor(stone.getColor()) && board.isCaptured(p.getX(), p.getY())){
-				board.removeStones(board.getChain(p.getX(), p.getY()));
+				removenda = board.getChain(p.getX(), p.getY());
+				if(capturedCount.containsKey(p.getColor()))
+					value = capturedCount.get(p.getColor()) + removenda.size();
+				else
+					value = removenda.size(); 
+				capturedCount.put(p.getColor(), value);
+				board.removeStones(removenda);
 			}
 		}
 		if(suicideRule && board.isCaptured(x, y)){
-			board.removeStones(board.getChain(x, y));
+			removenda = board.getChain(x, y); 
+			capturedCount.put(board.getColor(x, y), removenda.size());
+			board.removeStones(removenda);
 		}else if(!suicideRule && board.isCaptured(x, y)){
 			throw new SuicideException();
 		}
+		return capturedCount;
 	}
 	
 	public void checkVacancy(int x, int y) throws PositionOccupiedException{
-		if(board.getStone(x, y) != EMPTY){
+		if(board.getColor(x, y) != EMPTY){
 			throw new PositionOccupiedException();
 		}
 	}
+	
+	public void incrementCapturedStones(char color, int value){
+		if(color == BLACK)
+			capturedBlacks += value;
+		else if(color == WHITE)
+			capturedWhites += value;
+	}
+	
+	public int getCapturedStones(char color){
+		return color == BLACK ? capturedBlacks : color == WHITE ? capturedWhites : 0;
+	}
 
-	public HashSet<Integer> setStone(int index){
+	public Collection<Integer> setStone(int index){
 		return setStone(index % board.getBoardSize(), index / board.getBoardSize());
 	}
 	
-	public HashSet<Integer> setStone(int x, int y){
+	public Collection<Integer> setStone(int x, int y){
 		HashSet<Integer> changes = new HashSet<Integer>();
 		try{
 			checkRunning();
 			checkVacancy(x, y);
 			Board newBoard = board.clone();
 			newBoard.setStone(x, y, nextTurn);
-			doCaptures(newBoard, x, y);
+			Map<Character, Integer> capturedCount = doCaptures(newBoard, x, y);
 			checkKo(newBoard.toString());
+			for(Map.Entry<Character, Integer> entry : capturedCount.entrySet()) {
+				incrementCapturedStones(entry.getKey(), entry.getValue());
+			}
+			nextTurn = invertColor(nextTurn);
 			Situation s = new Situation(newBoard.toString(), nextTurn);
 			history.add(s);
 			for(int i = 0; i < board.getPosition().length; i++){
@@ -166,7 +207,6 @@ public class Game implements Parcelable {
 				}
 			}
 			board = newBoard;
-			nextTurn = invertColor(nextTurn);
 			passes = 0;
 //			board.print();
 		}catch(GameOverException ex) {

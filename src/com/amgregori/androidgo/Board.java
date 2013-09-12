@@ -48,7 +48,7 @@ public class Board {
 		}
 	}
 
-	public char getStone(int x, int y){
+	public char getColor(int x, int y){
 		if(x >= 0 && x < this.boardSize && y >= 0 && y < boardSize) 
 			return this.position[y * this.boardSize + x];
 		return Game.OUT_OF_BOUNDS;
@@ -69,20 +69,20 @@ public class Board {
 	public Point[] getSurrounding(int x, int y){
 		Point[] surrounding = {
 				// Left
-				new Point(x-1, y, getStone(x-1, y)),
+				new Point(x-1, y, getColor(x-1, y)),
 				// Right
-				new Point(x+1, y, getStone(x+1, y)),
+				new Point(x+1, y, getColor(x+1, y)),
 				// Top
-				new Point(x, y-1, getStone(x, y-1)),
+				new Point(x, y-1, getColor(x, y-1)),
 				// Bottom
-				new Point(x, y+1, getStone(x, y+1))
+				new Point(x, y+1, getColor(x, y+1))
 		};
 		return surrounding;
 	}
 
 	public HashSet<Point> getChain(int referenceX, int referenceY){ 
 		HashSet<Point> chain = new HashSet<Point>();
-		Point p = new Point(referenceX, referenceY, getStone(referenceX, referenceY));
+		Point p = new Point(referenceX, referenceY, getColor(referenceX, referenceY));
 		if(p.getColor() != Game.WHITE && p.getColor() != Game.BLACK){
 			return chain;
 		}
@@ -92,37 +92,17 @@ public class Board {
 
 	private HashSet<Point> getChain(int referenceX, int referenceY, HashSet<Point> chain){
 		for(Point p : getSurrounding(referenceX, referenceY)){
-			if(p.getColor() == getStone(referenceX, referenceY) &&
+			if(p.getColor() == getColor(referenceX, referenceY) &&
 					chain.add(new Point(p.getX(), p.getY(), p.getColor()))){
 				chain = getChain(p.getX(), p.getY(), chain);
 			}
 		}
 		return chain;
 	}
-	
-//	public HashSet<Integer> getChainIndices(int referenceX, int referenceY){
-//		HashSet<Integer> chain = new HashSet<Integer>();
-//		char color = getStone(referenceX, referenceY);
-//		if(color != Game.WHITE && color != Game.BLACK){
-//			return chain;
-//		}
-//		chain.add(referenceX + referenceY * boardSize);
-//		return getChainIndices(referenceX, referenceY, chain);
-//	}
-//	
-//	private HashSet<Integer> getChainIndices(int referenceX, int referenceY, HashSet<Integer> chain){
-//		for(Point p : getSurrounding(referenceX, referenceY)){
-//			if(p.getColor() == getStone(referenceX, referenceY) &&
-//					chain.add(p.getX() + p.getY() * boardSize)){
-//				chain = getChainIndices(p.getX(), p.getY(), chain);
-//			}
-//		}
-//		return chain;
-//	}
 
 	public boolean isCaptured(int x, int y){
 		// Raise an exception if the point in x, y is neither white nor black.
-		if(getStone(x, y) != Game.WHITE && getStone(x, y) != Game.BLACK){
+		if(getColor(x, y) != Game.WHITE && getColor(x, y) != Game.BLACK){
 			// Exception
 		}
 

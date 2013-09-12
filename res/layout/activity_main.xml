@@ -4,15 +4,52 @@
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
     >
-<GridView
+	<GridView
 	    android:id="@+id/gridview"
 	    android:layout_width="fill_parent" 
 	    android:layout_height="wrap_content"
-	    android:columnWidth="17dp"
 	    android:verticalSpacing="0dp"
 	    android:horizontalSpacing="0dp"
 	    android:stretchMode="columnWidth"
 	    android:gravity="center"
 	    android:layout_alignParentTop="true"
+	    android:layout_centerHorizontal="true"
 	/>
+		<RelativeLayout
+            android:layout_below="@id/gridview"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content">
+			<ImageView
+			    android:id="@+id/white"
+			    android:src="@drawable/go_white_no_bg"
+			    android:contentDescription="@string/white_stones_taken"
+			    android:layout_width="wrap_content"
+		        android:layout_height="wrap_content"
+		    />
+			<TextView
+		        android:id="@+id/white_taken"
+                android:layout_centerVertical="true"
+		        android:layout_toRightOf="@id/white"
+		        android:layout_width="30dp"
+		        android:layout_height="wrap_content"
+		        android:paddingLeft="2dp"    
+		    />
+		    <ImageView
+		        android:id="@+id/black"
+		        android:layout_alignParentRight="true"
+		        android:src="@drawable/go_black_no_bg"
+		        android:contentDescription="@string/black_stones_taken"
+		        android:layout_width="wrap_content"
+		        android:layout_height="wrap_content"
+		    />
+		    <TextView
+		        android:id="@+id/black_taken"
+                android:layout_centerVertical="true"
+		        android:layout_toLeftOf="@id/black"
+		        android:layout_width="30dp"
+		        android:layout_height="wrap_content"
+		        android:gravity="right"
+		        android:paddingRight="2dp"
+		    />
+    </RelativeLayout>
 </RelativeLayout>
