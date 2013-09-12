@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.amgregori.androidgo"
+    android:versionCode="1"
+    android:versionName="1.0" >
+
+    <uses-sdk
+        android:minSdkVersion="7"
+        android:targetSdkVersion="18" />
+
+    <application
+        android:allowBackup="true"
+        android:icon="@drawable/ic_launcher"
+        android:label="@string/app_name"
+        android:theme="@style/AppTheme" >
+        <activity
+            android:name="com.amgregori.androidgo.MainActivity"
+            android:label="@string/app_name"
+            android:theme="@style/Theme.Sherlock"
+            android:uiOptions="splitActionBarWhenNarrow" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name="com.amgregori.androidgo.AboutActivity"
+            android:label="@string/title_activity_about"
+            android:parentActivityName="com.amgregori.androidgo.MainActivity"
+            android:theme="@style/Theme.Sherlock.Light.DarkActionBar" >
+
+            <!-- Parent activity meta-data to support 4.0 and lower -->
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.amgregori.androidgo.MainActivity" />
+        </activity>
+        <activity
+            android:name="com.amgregori.androidgo.Settings"
+            android:label="@string/title_activity_settings"
+            android:theme="@style/Theme.Sherlock.Light.DarkActionBar"
+            android:parentActivityName="com.amgregori.androidgo.MainActivity" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.amgregori.androidgo.MainActivity" />
+        </activity>
+    </application>
+
+</manifest>

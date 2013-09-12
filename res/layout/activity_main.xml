@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout  xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/linearlayout"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:layout_gravity="center_horizontal"
+    android:orientation="vertical"
+    >
+	<GridView
+        android:id="@+id/gridview"
+        android:layout_width="fill_parent" 
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:verticalSpacing="0dp"
+        android:horizontalSpacing="0dp"
+        android:stretchMode="columnWidth"
+        android:gravity="center"
+    />
+	<LinearLayout
+	    android:id="@+id/control_buttons_layout"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+    	android:layout_gravity="center_horizontal" >
+		<Button 
+		    	android:id="@+id/controlButtonFirst"
+		        android:layout_width="wrap_content"
+		        android:layout_height="wrap_content"
+		    	android:text="@string/icon_double_angle_left" />
+		<Button 
+		    	android:id="@+id/controlButtonPrev"
+		        android:layout_width="wrap_content"
+		        android:layout_height="wrap_content"
+		    	android:text="@string/icon_chevron_left" />
+		<Button 
+		    	android:id="@+id/controlButtonNext"
+		        android:layout_width="wrap_content"
+		        android:layout_height="wrap_content"
+		    	android:text="@string/icon_chevron_right" />
+		<Button 
+		    	android:id="@+id/controlButtonLast"
+		        android:layout_width="wrap_content"
+		        android:layout_height="wrap_content"
+		    	android:text="@string/icon_double_angle_right" />
+	</LinearLayout>
+		<RelativeLayout
+		    android:id="@+id/relativelayout"
+		    android:layout_width="fill_parent"
+		    android:layout_height="match_parent"
+		    android:layout_gravity="center_horizontal"
+		    android:orientation="vertical"
+		    >
+		<ImageView
+		    android:id="@+id/white"
+		    android:src="@drawable/go_white_no_bg"
+		    android:contentDescription="@string/white_stones_taken"
+		    android:layout_width="wrap_content"
+	        android:layout_height="wrap_content"
+	    />
+		<TextView
+	        android:id="@+id/white_taken"
+	              android:layout_centerVertical="true"
+	        android:layout_toRightOf="@id/white"
+	        android:layout_width="30dp"
+	        android:layout_height="wrap_content"
+	        android:paddingLeft="2dp"    
+	    />
+	    <ImageView
+	        android:id="@+id/black"
+	        android:layout_alignParentRight="true"
+	        android:src="@drawable/go_black_no_bg"
+	        android:contentDescription="@string/black_stones_taken"
+	        android:layout_width="wrap_content"
+	        android:layout_height="wrap_content"
+	    />
+	    <TextView
+	        android:id="@+id/black_taken"
+	              android:layout_centerVertical="true"
+	        android:layout_toLeftOf="@id/black"
+	        android:layout_width="30dp"
+	        android:layout_height="wrap_content"
+	        android:gravity="right"
+	        android:paddingRight="2dp"
+	    />
+    </RelativeLayout>
+</LinearLayout>
