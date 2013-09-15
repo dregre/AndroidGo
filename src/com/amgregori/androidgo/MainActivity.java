@@ -30,6 +30,7 @@ public class MainActivity extends SherlockActivity {
 	private GridView gridView;
 	private TextView whiteCount;
 	private TextView blackCount;
+	private MenuItem passItem;
 	
 	//constants
 	private static final String GAME_KEY = "game";
@@ -45,19 +46,6 @@ public class MainActivity extends SherlockActivity {
 	    blackCount = (TextView) findViewById(R.id.black_taken);
 		fontAwesome = Typefaces.get(this, "fonts/fontawesome-webfont.ttf");
 		
-		int[] controlButtonIds = {
-			R.id.controlButtonFirst,
-			R.id.controlButtonPrev,
-			R.id.controlButtonNext,
-			R.id.controlButtonLast
-		};
-		
-		Button button;
-		for(int controlButtonId : controlButtonIds) {
-			button = (Button) findViewById(controlButtonId);
-			button.setTypeface(fontAwesome);
-		}
-		
 	    if(savedInstanceState == null){
 	    	game = newGameFromSettings();
 	    }else{
@@ -66,6 +54,60 @@ public class MainActivity extends SherlockActivity {
 	    }
 	    refreshCaptured();
 	    setupBoard();
+	    
+		int[] controlButtonIds = {
+				R.id.controlButtonFirst,
+				R.id.controlButtonPrev,
+				R.id.controlButtonNext,
+				R.id.controlButtonLast
+			};
+			
+			Button button;
+			for(int controlButtonId : controlButtonIds) {
+				button = (Button) findViewById(controlButtonId);
+				button.setTypeface(fontAwesome);
+				if(controlButtonId == R.id.controlButtonPrev){
+					button.setOnClickListener(new View.OnClickListener() {
+						@Override
+						public void onClick(View v) {
+							game.undoMove();
+						    refreshCaptured();
+						    refreshPassItem();
+						    setupBoard();
+						}
+					});
+				}else if(controlButtonId == R.id.controlButtonNext){
+					button.setOnClickListener(new View.OnClickListener() {
+						@Override
+						public void onClick(View v) {
+							game.redoMove();
+						    refreshCaptured();
+						    refreshPassItem();
+						    setupBoard();
+						}
+					});
+				}else if(controlButtonId == R.id.controlButtonFirst){
+					button.setOnClickListener(new View.OnClickListener() {
+						@Override
+						public void onClick(View v) {
+							game.firstMove();
+						    refreshCaptured();
+						    refreshPassItem();
+						    setupBoard();
+						}
+					});
+				}else if(controlButtonId == R.id.controlButtonLast){
+					button.setOnClickListener(new View.OnClickListener() {
+						@Override
+						public void onClick(View v) {
+							game.lastMove();
+						    refreshCaptured();
+						    refreshPassItem();
+						    setupBoard();
+						}
+					});
+				}
+			}
 	}
 	
 	private ImageAdapter setupBoard(){
@@ -113,19 +155,26 @@ public class MainActivity extends SherlockActivity {
 	    return new Game(koRule, suicideRule, boardSize);
 	}
 	
+	private void refreshPassItem(){
+		if(game.isRunning()){
+			passItem.setEnabled(true);
+			passItem.setTitle(R.string.pass_turn);
+		}else{
+			passItem.setEnabled(false);
+			passItem.setTitle(R.string.game_over);
+		}
+	}
+	
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         
-        final MenuItem passItem = menu.add(R.string.pass_turn)
+        passItem = menu.add(R.string.pass_turn)
         	.setShowAsActionFlags(MenuItem.SHOW_AS_ACTION_ALWAYS | MenuItem.SHOW_AS_ACTION_WITH_TEXT)
         	.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
 				@Override
 				public boolean onMenuItemClick(MenuItem item) {
 					game.passTurn();
-    				if(!game.isRunning()){
-    					item.setTitle(R.string.game_over);
-    					item.setEnabled(false);
-    				}
+					refreshPassItem();
 					return true;
     			}
     	    });;
@@ -138,10 +187,7 @@ public class MainActivity extends SherlockActivity {
     				game = newGameFromSettings();
     				refreshCaptured();
     				setupBoard();
-    				if(game.isRunning()){
-    					passItem.setEnabled(true);
-    					passItem.setTitle(R.string.pass_turn);
-    				}
+					refreshPassItem();
     				return true;
     			}
     	    });

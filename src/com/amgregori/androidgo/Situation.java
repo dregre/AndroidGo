@@ -1,12 +1,26 @@
 package com.amgregori.androidgo;
 
-public class Situation {
+import java.util.HashMap;
+
+import android.os.Bundle;
+import android.os.Parcel;
+import android.os.Parcelable;
+
+public class Situation implements Parcelable {
+	private final static String CAPTURES = "caps";
+	
 	String position;
 	char turn;
-	
+	HashMap<Character, Integer> captures;
+
 	Situation(String position, char turn){
+		this(position, turn, new HashMap<Character, Integer>());
+	}
+	
+	Situation(String position, char turn, HashMap<Character, Integer> captures){
 		this.position = position;
 		this.turn = turn;
+		this.captures = captures;
 	}
 	
 	public String getPosition(){
@@ -15,6 +29,10 @@ public class Situation {
 	
 	public char getTurn(){
 		return turn;
+	}
+	
+	public HashMap<Character, Integer> getCaptures(){
+		return captures;
 	}
 	
 	@Override
@@ -33,4 +51,31 @@ public class Situation {
 		}
 		return false;
 	}
+
+	@Override
+	public int describeContents() {
+		return 0;
+	}
+
+	@Override
+	public void writeToParcel(Parcel dest, int flags) {
+		dest.writeString(position);
+		dest.writeCharArray(new char[]{turn});
+		Bundle b = new Bundle();
+		b.putSerializable(CAPTURES, captures);
+	}
+	
+	public static final Parcelable.Creator<Situation> CREATOR = new Parcelable.Creator<Situation>(){
+        public Situation createFromParcel(Parcel in) {
+            String position = in.readString();
+            char turn = in.createCharArray()[0];
+            Bundle b = in.readBundle();
+            HashMap<Character, Integer> captures = (HashMap<Character, Integer>) b.getSerializable(CAPTURES);
+        	return new Situation(position, turn, captures);
+        }
+
+        public Situation[] newArray(int size) {
+            return new Situation[size];
+        }
+	};
 }

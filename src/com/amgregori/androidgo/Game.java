@@ -35,7 +35,7 @@ public class Game implements Parcelable {
 	Board board;
 	int passes;
 	char nextTurn;
-	HashSet<Situation> history;
+	History history;
 	boolean running;
 	int capturedWhites;
 	int capturedBlacks;
@@ -44,18 +44,14 @@ public class Game implements Parcelable {
 		return color == WHITE ? BLACK : color == BLACK ? WHITE : OUT_OF_BOUNDS;
 	}
 	
-	protected Game(String position, char nextTurn, boolean running, String[] historicalPositions,
-			       char[] historicalTurns, int koRule, boolean suicideRule, int capturedWhites, int capturedBlacks){
+	protected Game(String position, char nextTurn, boolean running, History history, int koRule, boolean suicideRule, int capturedWhites, int capturedBlacks){
 		this.board = new Board(position);
 		this.running = running;
 		this.nextTurn = nextTurn;
 		this.capturedWhites = capturedWhites;
 		this.capturedBlacks = capturedBlacks;
 		
-		this.history = new HashSet<Situation>();
-		for(int i = 0; i < historicalTurns.length; i++){
-			history.add(new Situation(historicalPositions[i], historicalTurns[i]));
-		}
+		this.history = history;
 		
 		this.koRule = koRule;
 		this.suicideRule = suicideRule;
@@ -67,10 +63,10 @@ public class Game implements Parcelable {
 		
 		this.board = new Board(boardSize);
 		this.nextTurn = BLACK;
-		this.history = new HashSet<Situation>();
+		this.history = new History();
 		this.running = true;
 		
-		Situation s = new Situation(this.board.toString(), invertColor(nextTurn));
+		Situation s = new Situation(this.board.toString(), nextTurn);
 		this.history.add(s);
 	}
 	
@@ -88,18 +84,7 @@ public class Game implements Parcelable {
 	
 	@Override
 	public void writeToParcel(Parcel dest, int flags){
-		String[] positions = new String[history.size()];
-		char[] turns = new char[history.size()];
-		int i = 0;
-		for(Situation s : history){
-			positions[i] = s.getPosition();
-			turns[i] = s.getTurn();
-			i++;
-		}
-		
 		dest.writeString(board.toString());
-		dest.writeCharArray(turns);
-		dest.writeStringArray(positions);
 		dest.writeIntArray(new int[]{
 				(int) nextTurn,
 				koRule,
@@ -110,14 +95,13 @@ public class Game implements Parcelable {
 				suicideRule,
 				running
 				});
+		dest.writeParcelable(history, 0);
 	}
 	
 	public static final Parcelable.Creator<Game> CREATOR = new Parcelable.Creator<Game>(){
 		@Override
 		public Game createFromParcel(Parcel parcel){
 			String position = parcel.readString();
-			char[] historicalTurns = parcel.createCharArray();
-			String[] historicalPositions = parcel.createStringArray();
 			
 			int[] intArray = parcel.createIntArray();
 			char nextTurn = (char) intArray[0];
@@ -129,7 +113,9 @@ public class Game implements Parcelable {
 			boolean suicideRule = booleanArray[0];
 			boolean running = booleanArray[1];
 			
-			return new Game(position, nextTurn, running, historicalPositions, historicalTurns,
+			History history = (History) parcel.readParcelable(History.class.getClassLoader());
+			
+			return new Game(position, nextTurn, running, history,
 					        koRule, suicideRule, capturedWhites, capturedBlacks);
 		}
 
@@ -139,19 +125,19 @@ public class Game implements Parcelable {
 		}
 	};
 	
-	public Map<Character, Integer> doCaptures(Board board, int x, int y) throws SuicideException{
+	public HashMap<Character, Integer> doCaptures(Board board, int x, int y) throws SuicideException{
+		HashMap<Character, Integer> capturedCount = new HashMap<Character, Integer>();
 		Point stone = new Point(x, y, board.getColor(x, y));
 		HashSet<Point> removenda = null;
-		int value;
-		HashMap<Character, Integer> capturedCount = new HashMap<Character, Integer>();
+		int count;
 		for(Point p : board.getSurrounding(x, y)){
 			if(p.getColor() == invertColor(stone.getColor()) && board.isCaptured(p.getX(), p.getY())){
 				removenda = board.getChain(p.getX(), p.getY());
 				if(capturedCount.containsKey(p.getColor()))
-					value = capturedCount.get(p.getColor()) + removenda.size();
+					count = capturedCount.get(p.getColor()) + removenda.size();
 				else
-					value = removenda.size(); 
-				capturedCount.put(p.getColor(), value);
+					count = removenda.size(); 
+				capturedCount.put(p.getColor(), count);
 				board.removeStones(removenda);
 			}
 		}
@@ -178,6 +164,13 @@ public class Game implements Parcelable {
 			capturedWhites += value;
 	}
 	
+	public void setCapturedStones(char color, int value){
+		if(color == BLACK)
+			capturedBlacks = value;
+		else if(color == WHITE)
+			capturedWhites = value;
+	}
+	
 	public int getCapturedStones(char color){
 		return color == BLACK ? capturedBlacks : color == WHITE ? capturedWhites : 0;
 	}
@@ -193,13 +186,13 @@ public class Game implements Parcelable {
 			checkVacancy(x, y);
 			Board newBoard = board.clone();
 			newBoard.setStone(x, y, nextTurn);
-			Map<Character, Integer> capturedCount = doCaptures(newBoard, x, y);
+			HashMap<Character, Integer> capturedCount = doCaptures(newBoard, x, y);
 			checkKo(newBoard.toString());
-			for(Map.Entry<Character, Integer> entry : capturedCount.entrySet()) {
+			for(HashMap.Entry<Character, Integer> entry : capturedCount.entrySet()) {
 				incrementCapturedStones(entry.getKey(), entry.getValue());
 			}
 			nextTurn = invertColor(nextTurn);
-			Situation s = new Situation(newBoard.toString(), nextTurn);
+			Situation s = new Situation(newBoard.toString(), nextTurn, capturedCount);
 			history.add(s);
 			for(int i = 0; i < board.getPosition().length; i++){
 				if(newBoard.getPosition()[i] != board.getPosition()[i]){
@@ -224,14 +217,12 @@ public class Game implements Parcelable {
 	public void passTurn(){
 		try{
 			checkRunning();
-			if(passes < 1){
-				Situation s = new Situation(board.toString(), nextTurn);
-				history.add(s);
-				nextTurn = invertColor(nextTurn);
-				passes += 1;
-			}else{
+			nextTurn = invertColor(nextTurn);
+			Situation s = new Situation(board.toString(), nextTurn);
+			history.add(s);
+			if(history.checkGameOver()){
 				running = false;
-				throw new GameOverException();
+				throw new GameOverException();				
 			}
 		}catch(GameOverException ex){
 			Log.v("1", "Game over.  No more moves allowed.");
@@ -263,6 +254,47 @@ public class Game implements Parcelable {
 					history.contains(t)){
 				throw new KoException();
 			}
+		}
+	}
+	
+	public void lastMove(){
+		Situation last = history.last();
+		board = new Board(last.getPosition());
+		nextTurn = last.getTurn();
+		for(HashMap.Entry<Character, Integer> e : history.getCumulativeCaptures().entrySet())
+			setCapturedStones(e.getKey(), e.getValue());
+		running = !history.checkGameOver();
+	}
+	
+	public void firstMove(){
+		Situation first = history.first();
+		board = new Board(first.getPosition());
+		nextTurn = first.getTurn();
+		capturedBlacks = 0;
+		capturedWhites = 0;
+		running = !history.checkGameOver();
+	}	
+	
+	public void undoMove(){
+		Situation current = history.current();
+		Situation previous = history.previous();
+		if(previous != null){
+			board = new Board(previous.getPosition());
+			nextTurn = previous.getTurn();
+			for(HashMap.Entry<Character, Integer> e : current.getCaptures().entrySet())
+				incrementCapturedStones(e.getKey(), e.getValue()*-1);
+			running = !history.checkGameOver();
+		}
+	}
+	
+	public void redoMove(){
+		Situation next = history.next();
+		if(next != null){
+			board = new Board(next.getPosition());
+			nextTurn = next.getTurn();
+			for(HashMap.Entry<Character, Integer> e : next.getCaptures().entrySet())
+				incrementCapturedStones(e.getKey(), e.getValue());
+			running = !history.checkGameOver();
 		}
 	}
 	
