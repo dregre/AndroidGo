@@ -3,7 +3,6 @@ package com.amgregori.androidgo;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Map;
 
 import android.os.Parcel;
 import android.os.Parcelable;

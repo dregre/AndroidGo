@@ -178,8 +178,9 @@ public class MainActivity extends SherlockActivity {
 					return true;
     			}
     	    });;
-
-        menu.add(R.string.new_game)
+        
+        SubMenu subMenu1 = menu.addSubMenu("Action Item");
+        subMenu1.add(R.string.new_game)
     		.setShowAsActionFlags(MenuItem.SHOW_AS_ACTION_ALWAYS | MenuItem.SHOW_AS_ACTION_WITH_TEXT)
     		.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
     			@Override
@@ -191,8 +192,6 @@ public class MainActivity extends SherlockActivity {
     				return true;
     			}
     	    });
-        
-        SubMenu subMenu1 = menu.addSubMenu("Action Item");
         subMenu1.add("Settings").setIntent(new Intent(this, Settings.class));
         subMenu1.add("About").setIntent(new Intent(this, AboutActivity.class));
 
