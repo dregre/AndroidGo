@@ -1,6 +1,8 @@
 package com.amgregori.androidgo;
 
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.Map;
 
 import android.os.Bundle;
 import android.os.Parcel;
@@ -72,6 +74,10 @@ public class History implements Parcelable{
 		return data.get(cursor-1);
 	}
 
+	public int size(){
+		return data.size();
+	}
+	
 	public boolean contains(Situation s){
 		return data.subList(0, cursor).contains(s);
 	}
@@ -88,7 +94,7 @@ public class History implements Parcelable{
 	}
 
 	public HashMap<Character, Integer> getCumulativeCaptures(){
-		return cumulativeCaptures;
+		return new HashMap<Character, Integer>(cumulativeCaptures);
 	}
 
 	@Override

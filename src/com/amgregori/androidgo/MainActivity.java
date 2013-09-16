@@ -1,6 +1,8 @@
 package com.amgregori.androidgo;
 
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 
 import android.content.Context;
 import android.content.Intent;
@@ -9,6 +11,7 @@ import android.graphics.Typeface;
 import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.util.SparseIntArray;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
@@ -55,59 +58,28 @@ public class MainActivity extends SherlockActivity {
 	    refreshCaptured();
 	    setupBoard();
 	    
-		int[] controlButtonIds = {
-				R.id.controlButtonFirst,
-				R.id.controlButtonPrev,
-				R.id.controlButtonNext,
-				R.id.controlButtonLast
-			};
+	    SparseIntArray historyButtons = new SparseIntArray();
+	    historyButtons.put(R.id.controlButtonFirst, Game.FIRST);
+	    historyButtons.put(R.id.controlButtonPrev, Game.PREVIOUS);
+	    historyButtons.put(R.id.controlButtonNext, Game.NEXT);
+	    historyButtons.put(R.id.controlButtonLast, Game.LAST);
+	    
+		for(int i = 0; i < historyButtons.size(); i++){
+			int resourceId = historyButtons.keyAt(i);
+			final int stepDirection = historyButtons.valueAt(i);
 			
-			Button button;
-			for(int controlButtonId : controlButtonIds) {
-				button = (Button) findViewById(controlButtonId);
-				button.setTypeface(fontAwesome);
-				if(controlButtonId == R.id.controlButtonPrev){
-					button.setOnClickListener(new View.OnClickListener() {
-						@Override
-						public void onClick(View v) {
-							game.undoMove();
-						    refreshCaptured();
-						    refreshPassItem();
-						    setupBoard();
-						}
-					});
-				}else if(controlButtonId == R.id.controlButtonNext){
-					button.setOnClickListener(new View.OnClickListener() {
-						@Override
-						public void onClick(View v) {
-							game.redoMove();
-						    refreshCaptured();
-						    refreshPassItem();
-						    setupBoard();
-						}
-					});
-				}else if(controlButtonId == R.id.controlButtonFirst){
-					button.setOnClickListener(new View.OnClickListener() {
-						@Override
-						public void onClick(View v) {
-							game.firstMove();
-						    refreshCaptured();
-						    refreshPassItem();
-						    setupBoard();
-						}
-					});
-				}else if(controlButtonId == R.id.controlButtonLast){
-					button.setOnClickListener(new View.OnClickListener() {
-						@Override
-						public void onClick(View v) {
-							game.lastMove();
-						    refreshCaptured();
-						    refreshPassItem();
-						    setupBoard();
-						}
-					});
+			Button button = (Button) findViewById(resourceId);
+			button.setTypeface(fontAwesome);
+			button.setOnClickListener(new View.OnClickListener() {
+				@Override
+				public void onClick(View v) {
+					game.stepHistory(stepDirection);
+				    refreshCaptured();
+				    refreshPassItem();
+				    setupBoard();
 				}
-			}
+			});
+	    }
 	}
 	
 	private ImageAdapter setupBoard(){
@@ -142,8 +114,8 @@ public class MainActivity extends SherlockActivity {
 	
 	// other methods
 	protected void refreshCaptured(){
-		whiteCount.setText(String.valueOf(game.capturedWhites));
-		blackCount.setText(String.valueOf(game.capturedBlacks));		
+		whiteCount.setText(String.valueOf(game.getCapturedStones(Game.WHITE)));
+		blackCount.setText(String.valueOf(game.getCapturedStones(Game.BLACK)));		
 	}
 	
 	private Game newGameFromSettings(){

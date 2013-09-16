@@ -20,7 +20,7 @@ public class Situation implements Parcelable {
 	Situation(String position, char turn, HashMap<Character, Integer> captures){
 		this.position = position;
 		this.turn = turn;
-		this.captures = captures;
+		this.captures = new HashMap<Character, Integer>(captures);
 	}
 	
 	public String getPosition(){
@@ -32,7 +32,7 @@ public class Situation implements Parcelable {
 	}
 	
 	public HashMap<Character, Integer> getCaptures(){
-		return captures;
+		return new HashMap<Character, Integer>(captures);
 	}
 	
 	@Override
