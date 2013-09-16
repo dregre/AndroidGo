@@ -43,7 +43,6 @@ public class Game implements Parcelable {
 	private char nextTurn;
 	private History history;
 	private boolean running;
-	private HashMap<Character, Integer> captures;
 
 	// Static methods.
 	public static char invertColor(char color){
@@ -55,7 +54,6 @@ public class Game implements Parcelable {
 		this.board = new Board(position);
 		this.running = running;
 		this.nextTurn = nextTurn;
-		this.captures = captures;
 
 		this.history = history;
 
@@ -71,9 +69,6 @@ public class Game implements Parcelable {
 		this.nextTurn = BLACK;
 		this.history = new History();
 		this.running = true;
-		this.captures = new HashMap<Character, Integer>();
-		this.captures.put(WHITE, 0);
-		this.captures.put(BLACK, 0);
 
 		Situation s = new Situation(this.board.toString(), nextTurn);
 		this.history.add(s);
@@ -93,7 +88,8 @@ public class Game implements Parcelable {
 	}
 
 	public int getCapturedStones(char color){
-		return captures.get(color);
+		Integer captures = history.current().getCaptures().get(color);
+		return  captures != null ? captures : 0;
 	}
 
 	public Collection<Integer> setStone(int index){
@@ -108,8 +104,8 @@ public class Game implements Parcelable {
 			Board newBoard = board.clone();
 			newBoard.setStone(x, y, nextTurn);
 			HashMap<Character, Integer> capturedCount = doCaptures(newBoard, x, y);
+			changeCaptures(capturedCount, history.current().getCaptures(), ADD);
 			checkKo(newBoard.toString());
-			changeCaptures(capturedCount, ADD);
 			nextTurn = invertColor(nextTurn);
 			Situation s = new Situation(newBoard.toString(), nextTurn, capturedCount);
 			history.add(s);
@@ -145,7 +141,6 @@ public class Game implements Parcelable {
 		});
 		dest.writeParcelable(history, 0);
 		Bundle b = new Bundle();
-		b.putSerializable(CAPTURES_KEY, captures);
 		dest.writeBundle(b);
 	}
 
@@ -187,22 +182,16 @@ public class Game implements Parcelable {
 			Situation step = null;
 			switch(direction){
 				case PREVIOUS:
-					Situation current = history.current();
 					step = history.previous();
-					if(step != null) changeCaptures(current.getCaptures(), SUBTRACT);
 					break;
 				case NEXT:
 					step = history.next();
-					if(step != null) changeCaptures(step.getCaptures(), ADD);
 					break;
 				case FIRST:
 					step = history.first();
-					captures.put(BLACK, 0);
-					captures.put(WHITE, 0);
 					break;
 				case LAST:
 					step = history.last();
-					captures = history.getCumulativeCaptures();
 					break;
 			}
 			if(step != null){
@@ -259,9 +248,16 @@ public class Game implements Parcelable {
 		return running;
 	}
 
-	public void changeCaptures(HashMap<Character, Integer> changes, int operation){
-		for(HashMap.Entry<Character, Integer> e : changes.entrySet())
-			captures.put(e.getKey(), captures.get(e.getKey()) + e.getValue()*operation);
+	public void changeCaptures(HashMap<Character, Integer> original, HashMap<Character, Integer> changes, int operation){
+		for(HashMap.Entry<Character, Integer> e : changes.entrySet()){
+			char key = e.getKey();
+			int value = e.getValue();
+			Integer addend = original.get(key);
+			if(addend != null)
+				original.put(key, addend + value*operation);
+			else
+				original.put(key, value*operation);
+		}
 	}
 
 	public void checkVacancy(int x, int y) throws PositionOccupiedException{

@@ -1,8 +1,6 @@
 package com.amgregori.androidgo;
 
-import java.util.Collections;
 import java.util.HashMap;
-import java.util.Map;
 
 import android.os.Bundle;
 import android.os.Parcel;
@@ -14,33 +12,21 @@ public class History implements Parcelable{
 
 	private SituationList data;
 	private int cursor;
-	private HashMap<Character, Integer> cumulativeCaptures;
 
 	public History(){
 		data = new SituationList();
 		cursor = 1;
-		cumulativeCaptures = new HashMap<Character, Integer>();
-		cumulativeCaptures.put(Game.BLACK, 0);
-		cumulativeCaptures.put(Game.WHITE, 0);
 	}
 	
 	protected History(SituationList data, int cursor, HashMap<Character, Integer> cumulativeCaptures){
 		this.data = data;
 		this.cursor = cursor;
-		this.cumulativeCaptures = cumulativeCaptures;
 	}
 
 	public void add(Situation s){
-		if(cursor < data.size()){
-			for(int i = cursor-1; i < data.size(); i++){
-				for(HashMap.Entry<Character, Integer> e : data.get(i).getCaptures().entrySet())
-					cumulativeCaptures.put(e.getKey(), cumulativeCaptures.get(e.getKey()) - e.getValue());
-			}
+		if(cursor < data.size())
 			data.removeRange(cursor, data.size());
-		}
 		data.add(s);
-		for(HashMap.Entry<Character, Integer> e : s.getCaptures().entrySet())
-			cumulativeCaptures.put(e.getKey(), cumulativeCaptures.get(e.getKey()) + e.getValue());
 		cursor = data.size();
 	}
 
@@ -91,10 +77,6 @@ public class History implements Parcelable{
 				return true;
 		}
 		return false;
-	}
-
-	public HashMap<Character, Integer> getCumulativeCaptures(){
-		return new HashMap<Character, Integer>(cumulativeCaptures);
 	}
 
 	@Override
