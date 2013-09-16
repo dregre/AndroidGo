@@ -95,7 +95,7 @@ public class Game implements Parcelable {
 	public Collection<Integer> setStone(int index){
 		return setStone(index % board.getBoardSize(), index / board.getBoardSize());
 	}
-
+	
 	public Collection<Integer> setStone(int x, int y){
 		HashSet<Integer> changes = new HashSet<Integer>();
 		try{
@@ -103,11 +103,10 @@ public class Game implements Parcelable {
 			checkVacancy(x, y);
 			Board newBoard = board.clone();
 			newBoard.setStone(x, y, nextTurn);
-			HashMap<Character, Integer> capturedCount = doCaptures(newBoard, x, y);
-			changeCaptures(capturedCount, history.current().getCaptures(), ADD);
+			HashMap<Character, Integer> capturesCount = changeCaptures(doCaptures(newBoard, x, y), history.current().getCaptures(), ADD);
 			checkKo(newBoard.toString());
 			nextTurn = invertColor(nextTurn);
-			Situation s = new Situation(newBoard.toString(), nextTurn, capturedCount);
+			Situation s = new Situation(newBoard.toString(), nextTurn, capturesCount);
 			history.add(s);
 			for(int i = 0; i < board.getPosition().length; i++){
 				if(newBoard.getPosition()[i] != board.getPosition()[i]){
@@ -204,36 +203,37 @@ public class Game implements Parcelable {
 	
 	// Other methods.
 	public HashMap<Character, Integer> doCaptures(Board board, int x, int y) throws SuicideException{
-		HashMap<Character, Integer> capturedCount = new HashMap<Character, Integer>();
+		HashMap<Character, Integer> capturesCount = new HashMap<Character, Integer>();
 		Point stone = new Point(x, y, board.getColor(x, y));
 		HashSet<Point> removenda = null;
 		int count;
 		for(Point p : board.getSurrounding(x, y)){
 			if(p.getColor() == invertColor(stone.getColor()) && board.isCaptured(p.getX(), p.getY())){
 				removenda = board.getChain(p.getX(), p.getY());
-				if(capturedCount.containsKey(p.getColor()))
-					count = capturedCount.get(p.getColor()) + removenda.size();
+				if(capturesCount.containsKey(p.getColor()))
+					count = capturesCount.get(p.getColor()) + removenda.size();
 				else
 					count = removenda.size(); 
-				capturedCount.put(p.getColor(), count);
+				capturesCount.put(p.getColor(), count);
 				board.removeStones(removenda);
 			}
 		}
 		if(suicideRule && board.isCaptured(x, y)){
 			removenda = board.getChain(x, y); 
-			capturedCount.put(board.getColor(x, y), removenda.size());
+			capturesCount.put(board.getColor(x, y), removenda.size());
 			board.removeStones(removenda);
 		}else if(!suicideRule && board.isCaptured(x, y)){
 			throw new SuicideException();
 		}
-		return capturedCount;
+		return capturesCount;
 	}
 
 	public void passTurn(){
 		try{
 			checkRunning();
 			nextTurn = invertColor(nextTurn);
-			Situation s = new Situation(board.toString(), nextTurn);
+			HashMap<Character, Integer> capturesCount = changeCaptures(new HashMap<Character, Integer>(), history.current().getCaptures(), ADD);
+			Situation s = new Situation(board.toString(), nextTurn, capturesCount);
 			history.add(s);
 			if(history.checkGameOver()){
 				running = false;
@@ -248,7 +248,7 @@ public class Game implements Parcelable {
 		return running;
 	}
 
-	public void changeCaptures(HashMap<Character, Integer> original, HashMap<Character, Integer> changes, int operation){
+	public HashMap<Character, Integer> changeCaptures(HashMap<Character, Integer> original, HashMap<Character, Integer> changes, int operation){
 		for(HashMap.Entry<Character, Integer> e : changes.entrySet()){
 			char key = e.getKey();
 			int value = e.getValue();
@@ -258,6 +258,7 @@ public class Game implements Parcelable {
 			else
 				original.put(key, value*operation);
 		}
+		return original;
 	}
 
 	public void checkVacancy(int x, int y) throws PositionOccupiedException{
