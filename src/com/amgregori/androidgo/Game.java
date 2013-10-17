@@ -1,3 +1,19 @@
+/*
+ * Copyright (C) 2013 Andre Gregori and Mark Garro 
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at 
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software 
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and 
+ * limitations under the License.
+ */
+
 package com.amgregori.androidgo;
 
 import java.util.Collection;
@@ -10,7 +26,11 @@ import android.os.Parcelable;
 import android.util.Log;
 
 
-
+/**
+ * 
+ * Model of a Go game.  Validates moves, stores history.
+ *
+ */
 public class Game implements Parcelable {
 	// Point constants.  Must be chars of positive integers.
 	public static final char WHITE = '0';
@@ -50,6 +70,18 @@ public class Game implements Parcelable {
 	}
 
 	// Constructors.
+	
+	/**
+	 * Constructor used internally to reconstruct game from
+	 * <code>Parcel</code>.
+	 * @param position
+	 * @param nextTurn
+	 * @param running
+	 * @param history
+	 * @param koRule
+	 * @param suicideRule
+	 * @param captures
+	 */
 	protected Game(String position, char nextTurn, boolean running, History history, int koRule, boolean suicideRule, HashMap<Character, Integer> captures){
 		this.board = new Board(position);
 		this.running = running;
@@ -61,6 +93,17 @@ public class Game implements Parcelable {
 		this.suicideRule = suicideRule;
 	}
 
+	/**
+	 * Constructs game with special rules.
+	 * @param koRule	Determines the game's ko rule. Either
+	 * <code>SITUATIONAL</code>, <code>POSITIONAL</code>, or
+	 * <code>JAPANESE</code>.
+	 *   
+	 * @param suicideRule	Switch to enable/disable suicide rule.  Use
+	 * <code>true</code> for enabled, <code>false</code> for disabled.
+	 * @param boardSize	Number of vertical or horizontal lines.
+	 * For example, a 19x19 board has a <code>boardSize</code> of 19.
+	 */
 	public Game(int koRule, boolean suicideRule, int boardSize){
 		this.koRule = koRule;
 		this.suicideRule = suicideRule;
@@ -74,29 +117,55 @@ public class Game implements Parcelable {
 		this.history.add(s);
 	}
 
+	/**
+	 * Constructs a game with positional superko, no suicide rule, and a
+	 * board size of 19x19.
+	 */
 	public Game(){
 		this(POSITIONAL, false, 19);
 	}
 
 	// Accessor & mutator methods.
+	
+	/**
+	 * Returns the position of the board.
+	 * @return	A character array representing the board's position.
+	 */
 	public char[] getPosition(){
 		return board.getPosition();
 	}
 
+	/**
+	 * Returns the size of the board.
+	 * @return	Number of vertical or horizontal lines.
+	 * For example, a 19x19 board will return 19.
+	 */
 	public int getBoardSize(){
 		return board.getBoardSize();
 	}
 
+	/**
+	 * Counts the number of stones captured in the last move for the
+	 * provided <code>color</code>.
+	 * @param color	Either <code>BLACK</code> or <code>WHITE</code>.
+	 * @return	Number of captured stones.
+	 */
 	public int getCapturedStones(char color){
 		Integer captures = history.current().getCaptures().get(color);
 		return  captures != null ? captures : 0;
 	}
 
+	/**
+	 * Sets a stone on the board, checking if the move is valid, and
+	 * performs any captures.
+	 * @param index	
+	 * @return The indexes of any changed stones in the board's position. 
+	 */
 	public Collection<Integer> setStone(int index){
 		return setStone(index % board.getBoardSize(), index / board.getBoardSize());
 	}
 	
-	public Collection<Integer> setStone(int x, int y){
+	private Collection<Integer> setStone(int x, int y){
 		HashSet<Integer> changes = new HashSet<Integer>();
 		try{
 			checkRunning();
@@ -175,7 +244,13 @@ public class Game implements Parcelable {
 		return 0;
 	}
 
-	// Undo, redo, first, last.
+	/**
+	 * Goes to a certain point in the game's history (either the previous,
+	 * next, first, or last moves).
+	 * 
+	 * @param direction	Either <code>PREVIOUS</code>, <code>NEXT</code>,
+	 * <code>FIRST</code>, or <code>LAST</code>.
+	 */
 	public void stepHistory(int direction){
 		if(history.size() > 1){
 			Situation step = null;
@@ -202,7 +277,7 @@ public class Game implements Parcelable {
 	}
 	
 	// Other methods.
-	public HashMap<Character, Integer> doCaptures(Board board, int x, int y) throws SuicideException{
+	private HashMap<Character, Integer> doCaptures(Board board, int x, int y) throws SuicideException{
 		HashMap<Character, Integer> capturesCount = new HashMap<Character, Integer>();
 		Point stone = new Point(x, y, board.getColor(x, y));
 		HashSet<Point> removenda = null;
@@ -228,6 +303,9 @@ public class Game implements Parcelable {
 		return capturesCount;
 	}
 
+	/**
+	 * Pass the current turn.
+	 */
 	public void passTurn(){
 		try{
 			checkRunning();
@@ -244,11 +322,16 @@ public class Game implements Parcelable {
 		}
 	}
 
+	/**
+	 * Check if game is not over.
+	 * @return	<code>true</code> if game is running, <code>false</code>
+	 * if game is over.
+	 */
 	public boolean isRunning(){
 		return running;
 	}
 
-	public HashMap<Character, Integer> changeCaptures(HashMap<Character, Integer> original, HashMap<Character, Integer> changes, int operation){
+	private HashMap<Character, Integer> changeCaptures(HashMap<Character, Integer> original, HashMap<Character, Integer> changes, int operation){
 		for(HashMap.Entry<Character, Integer> e : changes.entrySet()){
 			char key = e.getKey();
 			int value = e.getValue();
@@ -261,18 +344,18 @@ public class Game implements Parcelable {
 		return original;
 	}
 
-	public void checkVacancy(int x, int y) throws PositionOccupiedException{
+	private void checkVacancy(int x, int y) throws PositionOccupiedException{
 		if(board.getColor(x, y) != EMPTY){
 			throw new PositionOccupiedException();
 		}
 	}
 
-	public void checkRunning() throws GameOverException{
+	private void checkRunning() throws GameOverException{
 		if(!running)
 			throw new GameOverException();
 	}
 
-	public void checkKo(String position) throws KoException{
+	private void checkKo(String position) throws KoException{
 		// Japapnese ko
 		/* insert here */
 		// Situational superko
@@ -293,6 +376,7 @@ public class Game implements Parcelable {
 
 
 	// toString
+	
 	public String toString(){
 		return board.toString();
 	}

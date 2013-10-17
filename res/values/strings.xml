@@ -6,7 +6,11 @@
     <string name="pass_turn">Pass</string>
     <string name="game_over">Game over</string>
     <string name="new_game">New game</string>
-    <string name="about_this_app">AndroidGo was created by André Gregori as a test app.  Copyleft &#169; 2013 André Gregori.  No rights reserved.</string>
+    <string name="about_this_app"><b>AndroidGo:</b>  An open-source Go
+        (Baduk / Weiqi) app for Android. Copyright &#169; Andre Gregori
+        and Mark Garro.  Licensed under the Apache License v. 2.0.
+        <a href="http://www.apache.org/licenses/LICENSE-2.0">Read the license here.</a>
+    </string>
     <string name="title_activity_about">About AndroidGo</string>
     <string name="rules">Rules</string>
     <string name="ko">Ko</string>
@@ -19,8 +23,7 @@
     <string name="title_activity_settings">Settings</string>
     <string name="white_stones_taken">White stones taken</string>
     <string name="black_stones_taken">Black stones taken</string>
-
-       <string name="icon_glass">&#xf000;</string>
+    <string name="icon_glass">&#xf000;</string>
     <string name="icon_music">&#xf001;</string>
     <string name="icon_search">&#xf002;</string>
     <string name="icon_envelope">&#xf003;</string>
@@ -323,4 +326,5 @@
     <string name="icon_edit_sign">&#xf14b;</string>
     <string name="icon_external_link_sign">&#xf14c;</string>
     <string name="icon_share_sign">&#xf14d;</string>
+
 </resources>

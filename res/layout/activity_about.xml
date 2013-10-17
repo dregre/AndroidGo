@@ -9,8 +9,10 @@
     tools:context=".AboutActivity" >
 
     <TextView
+        android:id="@+id/about"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:linksClickable="true"
         android:text="@string/about_this_app" />
 
 </RelativeLayout>
